@@ -1,0 +1,10 @@
+version: '2'
+services:
+  sentry-server:
+      image: sentry
+      environment:
+        - SENTRY_SECRET_KEY=${SENTRY_SECRET_KEY}
+        - SENTRY_DB_PASSWORD=${POSTGRES_PASSWORD}
+        - SENTRY_DB_USER=${POSTGRES_USER}
+        - SENTRY_POSTGRES_HOST=postgres
+        - SENTRY_REDIS_HOST=redis

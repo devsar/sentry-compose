@@ -1,0 +1,59 @@
+version: '2'
+services:
+  postgres:
+    image: postgres
+    volumes:
+      - ${DB_PATH}:/database
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PGDATA=/database
+
+  redis:
+    image: redis
+
+  sentry-server:
+    extends:
+     service: sentry-server
+     file: server.yml
+    ports:
+      - "127.0.0.1:9000:9000"
+    volumes:
+      - ${SENTRY_FILES}:/var/lib/sentry/files
+      - ./config.yml:/etc/sentry/config.yml
+    links:
+      - postgres:postgres
+      - redis:redis
+    depends_on:
+      - postgres
+      - redis
+
+  sentry-cron:
+    extends:
+     service: sentry-server
+     file: server.yml
+    command: sentry run cron
+    volumes:
+      - ${SENTRY_FILES}:/var/lib/sentry/files
+      - ./config.yml:/etc/sentry/config.yml
+    links:
+      - postgres:postgres
+      - redis:redis
+    depends_on:
+      - postgres
+      - redis
+
+  sentry-worker:
+    extends:
+     service: sentry-server
+     file: server.yml
+    command: sentry run worker
+    volumes:
+      - ${SENTRY_FILES}:/var/lib/sentry/files
+      - ./config.yml:/etc/sentry/config.yml
+    links:
+      - postgres:postgres
+      - redis:redis
+    depends_on:
+      - postgres
+      - redis
